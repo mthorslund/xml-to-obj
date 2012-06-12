@@ -1,0 +1,5 @@
+This repo contains a PHP 5 utility class along with some sample data and examples.
+
+The purpose of the class is to read an XML file (could be configuration settings, or some exported data from an external system) and map that to a number of existing PHP classes. This uses PHP's SimpleXMLElement class. I think the code shows a pretty flexible and reusable approach, though I don't imagine I'm the first one to invent something like this. The only expectation of the existing PHP classes is that they implement a "factory" method I chose to call "create": That method should take my ElementWrapper object as an argument, instantiate the PHP class and return the resulting object.
+
+I don't know about performance, as I haven't had the need to test this. I use the same technique as a part of my build process, which is not a run-time operation. So I just put that disclaimer there in case it performs horribly under stress.
