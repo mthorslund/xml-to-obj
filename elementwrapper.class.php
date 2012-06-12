@@ -40,7 +40,7 @@
  *
  *  @author         Mattias Thorslund <mattias@thorslund.us>
  *  @copyright      2012 Mattias Thorslund.
- *  @license        
+ *  @license        Simplified BSD
  */
 
 
