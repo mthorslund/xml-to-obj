@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+Sample XML file for the ElementWrapper class.
+-->
+<Menu>
+    <Category phrase="Battlestar Galactica">
+        <Category phrase="Cylons">
+            <InternalLink target="spacecraft.php?type=cylon" phrase="Spacecraft">
+                <InternalLink target="spacecraft.php?type=raider" phrase="Raider"/>
+                <InternalLink target="spacecraft.php?type=baseship" phrase="Base Ship"/>
+                <InternalLink target="spacecraft.php?type=resurrection" phrase="Resurrection Ship"/>
+            </InternalLink>
+            <InternalLink target="people.php?type=cylon" phrase="Characters">
+                <InternalLink target="people.php?id=boomer" phrase="Boomer"/>
+                <InternalLink target="people.php?id=deanna" phrase="Deanna"/>
+                <InternalLink target="people.php?id=caprica" phrase="Caprica Six"/>
+            </InternalLink>
+        </Category>
+        <Category phrase="Humans">
+            <InternalLink target="colonies.php" phrase="Colonies"/>
+            <InternalLink target="spacecraft.php?type=human" phrase="Spacecraft">
+                <InternalLink target="spacecraft.php?type=viper" phrase="Viper"/>
+                <InternalLink target="spacecraft.php?type=battlestar" phrase="Battlestar"/>
+            </InternalLink>
+            <InternalLink target="people.php?type=cylon" phrase="Characters">
+                <InternalLink target="people.php?id=lee-adama" phrase="Lee Adama"/>
+                <InternalLink target="people.php?id=bill-adama" phrase="William Adama"/>
+                <InternalLink target="people.php?id=laura-roslyn" phrase="Laura Roslyn"/>
+                <InternalLink target="people.php?id=gaius-baltar" phrase="Gaius Baltar"/>
+            </InternalLink>
+        </Category>
+        <ExternalLink target="http://example.com/resources.php" phrase="Battlestar Galactica Encyclopedia"/>
+        <ExternalLink target="http://wikipedia.org/Battlestar_Galactica" phrase="Wikipedia Article"/>
+    </Category>
+</Menu>
