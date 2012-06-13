@@ -9,11 +9,19 @@
  *  The only requirement is that your class implements the
  *  "create" method as in these examples. See further comments
  *  in-line.
+ *
+ *  PHP 5.3
+ *
+ *  @package    SampleCode
  */
 
 
 /**
- *  This class maps to the root element, also named Menu.
+ *  Menu element class
+ *
+ *  This class maps to the root XML element, also named Menu.
+ *
+ *  @package    SampleCode
  */
 class Menu
 {
@@ -50,10 +58,12 @@ function __construct(&$element, &$container = null)
 
 
 /**
- *  Another class
+ *  Category sample class
  *
  *  It is NOT necessary to derive the mapped classes from each other.
  *  They do need to implement the "create" method, and that's all.
+ *
+ *  @package    SampleCode
  */
 class Category extends Menu
 {
@@ -81,7 +91,11 @@ function __construct(&$element, &$container = null)
 
 
 /**
- *  This class is used for both the InternalLink and ExternalLink elements.
+ *  Link sample class
+ *
+ *  This class is used for both the InternalLink and ExternalLink XML elements.
+ *
+ *  @package    SampleCode
  */
 class Link extends Category
 {

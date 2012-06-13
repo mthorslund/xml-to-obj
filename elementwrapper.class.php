@@ -12,6 +12,8 @@
  *
  *  For usage, see the test.php file.
  *
+ *  PHP 5.3
+ *
  *
  *  LICENSE: Simplified BSD
  *
@@ -39,8 +41,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *  @author         Mattias Thorslund <mattias@thorslund.us>
- *  @copyright      2012 Mattias Thorslund.
- *  @license        Simplified BSD
+ *  @copyright      Copyright (c) 2012, Mattias Thorslund.
+ *                  All Rights Reserved.
+ *  @license        http://opensource.org/licenses/BSD-2-Clause
+ *  @version        0.9
+ *  @package        ElementWrapper
  */
 
 
@@ -49,10 +54,10 @@
  *
  *  Although it would be more elegant, simply extending SimpleXMLElement 
  *  would leave out some abilities:
- *    * Because SimpleXMLElement::_construct() is final, we can't override it
- *      so that additional properties could be set.
- *    * Methods that return elements would always return SimpleXMLElement
- *      instances, not instances of the extended class.
+ *   Because SimpleXMLElement::_construct() is final, we can't override it
+ *       so that additional properties could be set.
+ *   Methods that return elements would always return SimpleXMLElement
+ *       instances, not instances of the extended class.
  *
  *  Instead, we wrap a SimpleXMLElement instance within the ElementWrapper 
  *  object and implement the necessary methods. 
@@ -60,6 +65,8 @@
  *  Since what we're after here is the ability to easily instantiate PHP classes
  *  from XML, I haven't (yet) implemented all the wonderful features of
  *  SimpleXMLElement.
+ *
+ *  @package    ElementWrapper
  */
 class ElementWrapper
 {
@@ -67,6 +74,8 @@ class ElementWrapper
 
 /**
  *  Internal instance of SimpleXMLElement that is being wrapped.
+ *
+ *  @var        SimpleXMLElement
  */
 protected $_sxe; 
 
@@ -74,11 +83,15 @@ protected $_sxe;
 /**
  *  What to do if a matching class for an element is not found.
  *
- *  'error':   trigger an error
- *  'null' :   ignore and return a null value
- *  'generic': return a generic (StdClass) object
+ *  Expected values:
+ *      'error':   trigger an error,
+ *      'null' :   ignore and return a null value,
+ *      'generic': return a generic (StdClass) object.
+ *  Defaults to 'error'.
+ *
+ *  @var    string
  */
-private static $missingClassBehavior = 'error'; //or 'null', or 'generic'
+protected static $missingClassBehavior = 'error'; //or 'null', or 'generic'
 
 
 /**
@@ -86,14 +99,27 @@ private static $missingClassBehavior = 'error'; //or 'null', or 'generic'
  *
  *  Values are optional: If an entry is not found, the matching class name is
  *  assumed to be the same as the element name.
+ *
+ *  @var    array
  */
-private static $classMap = array();
+protected static $classMap = array();
 
 
 /**
  *  Constructor
+ *
+ *  @param SimpleXMLElement &$sxe
+ *      A SimpleXMLElement instance.
+ *  @param array $classMap
+ *      An array that maps XML Element names to PHP classes where the element 
+ *      names are defined as the array index values. Defaults to an empty 
+ *      array (class names expected to match XML element names).
+ *  @param string $missingClassBehavior
+ *      What to do if a matching class for an element is not found. 
+ *      Expected values: 'error' (trigger an error), 'null' (just return null), 
+ *      'generic' (return a generic StdClass object). Defaults to 'error'.
  */
-public function __construct(&$sxe, $classMap = false, $missingClassBehavior = false)
+public function __construct(&$sxe, $classMap = false, $missingClassBehavior = null)
 {
     $this->_sxe = $sxe;
     if($missingClassBehavior){
@@ -105,15 +131,35 @@ public function __construct(&$sxe, $classMap = false, $missingClassBehavior = fa
 }
 
 
+/**
+ *  Destroys the wrapped SimpleXMLElement instance.
+ */
 public function __destruct()
 {
-//    print "Destroying ".$this->getName()."\n";
     $this->_sxe = null;
 }
 
 
 /**
  *  Factory method that creates an ElementWrapper from a file path
+ *
+ *  @param string $filePath 
+ *      Path to XML file.
+ *  @param array $classMap (see ElementWrapper::__construct())
+ *  @param string $missingClassBehavior (see ElementWrapper::__construct())
+ *  @param int $options LibXML options. 
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}. For expected values, see {@link 
+ *      http://us.php.net/manual/en/libxml.constants.php LibXML Constants}.
+ *  @param string $ns 
+ *      Namespace. Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @param boolean $is_prefix 
+ *      True if $ns is a prefix, false if it is a URI. 
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @see ElementWrapper::__construct()
+ *  @return ElementWrapper
  */
 public static function &createFromFile(
     $filePath,
@@ -134,6 +180,24 @@ public static function &createFromFile(
 
 /**
  *  Factory method that creates an ElementWrapper from an XML string
+ *
+ *  @param string $xml 
+ *      A valid XML string.
+ *  @param array $classMap (see ElementWrapper::__construct())
+ *  @param string $missingClassBehavior (see ElementWrapper::__construct())
+ *  @param int $options LibXML options. 
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}. For expected values, see {@link 
+ *      http://us.php.net/manual/en/libxml.constants.php LibXML Constants}.
+ *  @param string $ns 
+ *      Namespace. Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @param boolean $is_prefix 
+ *      True if $ns is a prefix, false if it is a URI.
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @see ElementWrapper::__construct()
+ *  @return ElementWrapper
  */
 public static function &createFromXML(
     $xml,
@@ -154,6 +218,13 @@ public static function &createFromXML(
 
 /**
  *  Factory method that creates an ElementWrapper from a SimpleXMLElement instance
+ *
+ *  @param SimpleXMLElement &$sxe
+ *      An existing SimpleXMLElement instance
+ *  @param array $classMap (see ElementWrapper::__construct())
+ *  @param string $missingClassBehavior (see ElementWrapper::__construct())
+ *  @see ElementWrapper::__construct()
+ *  @return ElementWrapper
  */
 public static function createFromSXE(&$sxe, $classMap = false, $missingClassBehavior = false)
 {
@@ -164,6 +235,30 @@ public static function createFromSXE(&$sxe, $classMap = false, $missingClassBeha
 
 /**
  *  Factory method that creates an ElementWrapper using the same parameters as SimpleXMLElement
+ *
+ *  The ElementWrapper parameters $classMap and $missingClassBehavior are added at the end of
+ *  the parameter list.
+ *
+ *  @param string $data 
+ *      Path to XML file, or an XML string. Depends on $data_is_url.
+ *  @param int $options LibXML options.
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}. For expected values, see {@link 
+ *      http://us.php.net/manual/en/libxml.constants.php LibXML Constants}.
+ *  @param boolean $data_is_url
+ *      Whether $data is a path to an XML file (if false, $data is expected to be a valid
+ *      XML string.
+ *  @param string $ns 
+ *      Namespace. Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @param boolean $is_prefix 
+ *      True if $ns is a prefix, false if it is a URI.
+ *      Passed to {@link http://us.php.net/manual/en/simplexmlelement.construct.php
+ *      SimpleXMLElement constructor}.
+ *  @param array $classMap (see ElementWrapper::__construct())
+ *  @param string $missingClassBehavior (see ElementWrapper::__construct())
+ *  @see ElementWrapper::__construct()
+ *  @return ElementWrapper
  */
 public static function createLikeSXE($data, $options = 0, $data_is_url = false, $ns = '', $is_prefix = false, $classMap = false, $missingClassBehavior = false)
 {
@@ -173,8 +268,18 @@ public static function createLikeSXE($data, $options = 0, $data_is_url = false, 
 
 
 /**
- * Returns an instance of a class named the same as the element
- * unless the class name is overridden in the $className parameter
+ *  Returns an instance of a PHP class, using the XML element.
+ *
+ *  Unless the XML element name is listed in the ElementWrapper::$classMap 
+ *  array, the PHP class name is expected to be the same as the element name.
+ *
+ *  @param string $elementName
+ *      Overrides the element's name for the purpose of instantiating a different
+ *      class than the default.
+ *  @param object &$callerRef
+ *      A refrence to the calling object (or other object reference) to be 
+ *      passed to the object being instantiated.
+ *  @return object
  */
 public function &createObject($elementName = null, &$callerRef = null)
 {
@@ -222,6 +327,8 @@ public function &createObject($elementName = null, &$callerRef = null)
 
 /**
  *  Returns the SXE instance.
+ *
+ *  @return SimpleXMLElement
  */
 public function &getSXE()
 {
@@ -233,6 +340,8 @@ public function &getSXE()
  *  Returns an XML string
  *
  *  This does not implemnt SimpleXMLElement's save-to-file functionality; use saveAsFile() for that.
+ *
+ *  @return string
  */
 public function asXML()
 {
@@ -244,6 +353,9 @@ public function asXML()
  *  Saves the XML string as a file
  *
  *  Returns true or false depending on success.
+ *
+ *  @param  string $filePath Path to save the XML to.
+ *  @return boolean
  */
 public function saveAsFile($filePath)
 {
@@ -253,6 +365,9 @@ public function saveAsFile($filePath)
 
 /**
  *  Converts an array of SimpleXMLElement instances to an array of ElementWrapper
+ *
+ *  @param  array &$sxes Array of SimpleXMLElement instances.
+ *  @return array
  */
 private function wrapSXEs(&$sxes)
 {
@@ -266,6 +381,9 @@ private function wrapSXEs(&$sxes)
 
 /**
  *  Returns matches to an XPATH expression as ElementWrapper instances.
+ *
+ *  @param  string $path An XPATH expression.
+ *  @return array An array of ElementWrapper instances.
  */
 public function xpath($path)
 {
@@ -275,6 +393,9 @@ public function xpath($path)
 
 /**
  *  Quicker version of xpath method which does not wrap each result as ElementWrapper
+ *
+ *  @param  string $path An XPATH expression.
+ *  @return array An array of SimpleXMLElement instances.
  */
 public function xpathAsSXE($path)
 {
@@ -284,6 +405,8 @@ public function xpathAsSXE($path)
 
 /**
  *  Returns the element name
+ *
+ *  @return string The element name
  */
 public function getName()
 {
@@ -293,6 +416,10 @@ public function getName()
 
 /**
  *  Returns the element's child elements wrapped as ElementWrapper instances
+ *
+ *  @param  string $ns Namespace
+ *  @param  boolean $is_prefix True if $ns is a prefix, false if it is a URI.
+ *  @return array An array of ElementWrapper instances.
  */
 public function children($ns = null,$is_prefix = false)
 {
@@ -302,6 +429,8 @@ public function children($ns = null,$is_prefix = false)
 
 /**
  *  Returns the element attributes
+ *
+ *  @return array An array indexed by attribute names.
  */
 public function attributes()
 {
@@ -309,6 +438,12 @@ public function attributes()
 }
 
 
+/**
+ *  Returns the value of the named element attribute
+ *
+ *  @param  string $name Name of the attribute.
+ *  @return string Value of the attribute.
+ */
 public function getAttribute($name)
 {
     $attributes = $this->_sxe->attributes();

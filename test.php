@@ -4,9 +4,20 @@
  *
  *  Run this script from your console:
  *  $ php test.php
+ *
+ *  PHP 5.3
+ *
+ *  @package    SampleCode
  */
 
+/**
+ *  The ElementWrapper utility class
+ */
 include_once 'elementwrapper.class.php';
+
+/**
+ *  Some sample class definitions to map the XML data to
+ */
 include_once 'sampleclasses.php';
 
 
