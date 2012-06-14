@@ -3,7 +3,7 @@
  *  Usage example for the ElementWrapper class.
  *
  *  Run this script from your console:
- *  $ php test.php
+ *  $ php sample-usage.php
  *
  *  PHP 5.3
  *

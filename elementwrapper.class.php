@@ -10,7 +10,7 @@
  *  The PHP classes to be instantiated could be any classes, only they need to
  *  implement the "create" method (see sampleclasses.php).
  *
- *  For usage, see the test.php file.
+ *  For usage, see the sample-usage.php file.
  *
  *  PHP 5.3
  *
@@ -84,14 +84,15 @@ protected $_sxe;
  *  What to do if a matching class for an element is not found.
  *
  *  Expected values:
- *      'error':   trigger an error,
- *      'null' :   ignore and return a null value,
- *      'generic': return a generic (StdClass) object.
+ *      'error':     trigger an error,
+ *      'exception': throw an exception,
+ *      'null' :     ignore and return a null value,
+ *      'generic':   return a generic (StdClass) object.
  *  Defaults to 'error'.
  *
  *  @var    string
  */
-protected static $missingClassBehavior = 'error'; //or 'null', or 'generic'
+protected static $missingClassBehavior = 'error';
 
 
 /**
@@ -116,8 +117,9 @@ protected static $classMap = array();
  *      array (class names expected to match XML element names).
  *  @param string $missingClassBehavior
  *      What to do if a matching class for an element is not found. 
- *      Expected values: 'error' (trigger an error), 'null' (just return null), 
- *      'generic' (return a generic StdClass object). Defaults to 'error'.
+ *      Expected values: 'error' (trigger an error), 'exception' (throws an 
+ *      ElementWrapperException), 'null' (just return null), 'generic' (returns
+ *      a generic StdClass object). Defaults to 'error'.
  */
 public function __construct(&$sxe, $classMap = false, $missingClassBehavior = null)
 {
@@ -164,7 +166,7 @@ public function __destruct()
 public static function &createFromFile(
     $filePath,
     $classMap = false,
-    $missingClassBehavior = false,
+    $missingClassBehavior = null,
     $options = 0,
     $ns = '',
     $is_prefix = false)
@@ -202,7 +204,7 @@ public static function &createFromFile(
 public static function &createFromXML(
     $xml,
     $classMap = false,
-    $missingClassBehavior = false,
+    $missingClassBehavior = null,
     $options = 0,
     $ns = '',
     $is_prefix = false)
@@ -226,7 +228,7 @@ public static function &createFromXML(
  *  @see ElementWrapper::__construct()
  *  @return ElementWrapper
  */
-public static function createFromSXE(&$sxe, $classMap = false, $missingClassBehavior = false)
+public static function createFromSXE(&$sxe, $classMap = false, $missingClassBehavior = null)
 {
     $element = new ElementWrapper($sxe, $classMap, $missingClassBehavior);
     return $element;
@@ -260,7 +262,7 @@ public static function createFromSXE(&$sxe, $classMap = false, $missingClassBeha
  *  @see ElementWrapper::__construct()
  *  @return ElementWrapper
  */
-public static function createLikeSXE($data, $options = 0, $data_is_url = false, $ns = '', $is_prefix = false, $classMap = false, $missingClassBehavior = false)
+public static function createLikeSXE($data, $options = 0, $data_is_url = false, $ns = '', $is_prefix = false, $classMap = false, $missingClassBehavior = null)
 {
     $element = new ElementWrapper(new SimpleXMLElement($data, $options, $data_is_url, $ns, $is_prefix), $classMap, $missingClassBehavior);
     return $element;
@@ -299,6 +301,9 @@ public function &createObject($elementName = null, &$callerRef = null)
         switch(self::$missingClassBehavior){
         case 'error':
             trigger_error( "Class '$className' is not defined.", E_USER_ERROR );
+            break;
+        case 'exception':
+            throw new ElementWrapperException("Class '$className' is not defined.");
             break;
         case 'object':
             $object = new StdClass();
@@ -452,3 +457,15 @@ public function getAttribute($name)
     }
 }
 } //end class ElementWrapper
+
+
+
+/**
+ *  Custom exception class for the ElementWrapper functionality
+ *
+ *  @package    ElementWrapper
+ */
+class ElementWrapperException extends Exception
+{
+
+}
